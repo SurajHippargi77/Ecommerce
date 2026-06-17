@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Profile - Sunny Shop</title>
+  <link rel="stylesheet" href="css/styles.css">
+ </head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo">Sunny Shop</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+        <a href="login.html">Login</a>
+        <a href="register.html">Register</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container form-page">
+    <h2>Your Profile</h2>
+    <div class="card">
+      <p><strong>Name:</strong> <span id="profile-name">-</span></p>
+      <p><strong>Email:</strong> <span id="profile-email">-</span></p>
+      <p><strong>Avatar:</strong> <span id="profile-avatar">-</span></p>
+      <p><button id="logout-btn" class="btn">Logout</button></p>
+    </div>
+
+    <h2>Your Cart</h2>
+    <div id="profile-cart"></div>
+
+    <h2>Order History</h2>
+    <div id="profile-orders"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 2026 Sunny Shop — demo frontend</div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    (function(){
+      const current = loadCurrentUser();
+      if(!current){ window.location.href = 'login.html'; return }
+      document.getElementById('profile-name').textContent = current.name || '-';
+      document.getElementById('profile-email').textContent = current.email || '-';
+      document.getElementById('profile-avatar').textContent = current.avatar_url || 'Human avatar icon';
+      document.getElementById('logout-btn').addEventListener('click', ()=>{ logout() });
+
+      // render cart items
+      apiRequest(`/cart/${encodeURIComponent(current.user_id || current.email)}`)
+        .then(cart => {
+          const container = document.getElementById('profile-cart');
+          if(!cart.items || cart.items.length === 0){ container.innerHTML = '<p>No items in cart.</p>'; return }
+          container.innerHTML = '';
+          cart.items.forEach(item => {
+            const el = document.createElement('div'); el.className='card';
+            el.innerHTML = `<strong>${item.name}</strong> — ${formatCurrency(item.price)} × ${item.quantity}`;
+            container.appendChild(el);
+          })
+        })
+        .catch(err => { document.getElementById('profile-cart').innerHTML = `<p>${err.message}</p>` })
+
+      apiRequest(`/orders/${encodeURIComponent(current.user_id || current.email)}`)
+        .then(orders => {
+          const container = document.getElementById('profile-orders');
+          if(!orders || orders.length === 0){ container.innerHTML = '<p>No orders yet.</p>'; return }
+          container.innerHTML = '';
+          orders.forEach(order => {
+            const el = document.createElement('div'); el.className='card';
+            const created = order.created_at ? new Date(order.created_at).toLocaleString() : '';
+            el.innerHTML = `<strong>Order ${order.id}</strong><div class="muted">${created}</div><div>Status: ${order.status || '-'} | Payment: ${order.payment_method || '-'}</div><div>Total: ${formatCurrency(order.total || 0)}</div>`;
+            container.appendChild(el);
+          })
+        })
+        .catch(err => { document.getElementById('profile-orders').innerHTML = `<p>${err.message}</p>` })
+    })();
+  </script>
+</body>
+</html>

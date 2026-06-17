@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cart - Sunny Shop</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo">Sunny Shop</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+        <a href="login.html">Login</a>
+        <a href="register.html">Register</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Your Cart</h2>
+    <div id="cart-items" class="card"></div>
+    <div id="cart-summary" class="card"></div>
+    <div id="checkout-panel" class="card">
+      <h3>Payment</h3>
+      <label>Payment Method
+        <select id="payment-method">
+          <option value="cod">Cash on Delivery</option>
+          <option value="upi">UPI</option>
+          <option value="card">Debit / Credit Card</option>
+          <option value="netbanking">Net Banking</option>
+        </select>
+      </label>
+      <label>Delivery Address
+        <textarea id="delivery-address" rows="3" placeholder="Enter your delivery address"></textarea>
+      </label>
+      <button id="checkout-btn" class="btn">Place Order</button>
+      <p class="muted">This is a demo payment flow. No real payment is processed.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 2026 Sunny Shop — demo frontend</div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
