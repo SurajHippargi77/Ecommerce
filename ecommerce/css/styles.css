@@ -327,10 +327,11 @@ html {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(15, 23, 42, 0.55);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  background: rgba(7, 11, 20, 0.85);
+  border-bottom: 1px solid rgba(255, 183, 3, 0.25);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: 0 4px 30px rgba(255, 183, 3, 0.08);
   padding: 0.85rem 0;
   transition:
     padding 0.4s var(--spring),
@@ -357,8 +358,10 @@ html {
 .logo {
   margin: 0;
   font-size: 1.35rem;
-  color: #fff;
-  letter-spacing: 0.02em;
+  color: var(--accent);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 20px rgba(255, 183, 3, 0.5), 0 0 40px rgba(255, 183, 3, 0.2);
   animation: logoBounceIn 1s var(--spring) 0.2s both;
 }
 
@@ -366,9 +369,9 @@ nav a {
   position: relative;
   display: inline-block;
   margin-left: 1rem;
-  color: var(--muted);
+  color: #94a3b8;
   text-decoration: none;
-  transition: color 0.25s ease;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
   transform-origin: center center;
 }
 
@@ -387,7 +390,8 @@ nav a::after {
 }
 
 nav a:hover {
-  color: #fff;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 183, 3, 0.6);
   animation: rubberBand 0.65s var(--spring);
 }
 
@@ -403,9 +407,10 @@ nav a:hover::after {
   height: 36px;
   border-radius: 999px;
   background: linear-gradient(135deg, rgba(255, 183, 3, 0.08), rgba(251, 133, 0, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 183, 3, 0.4);
+  box-shadow: 0 0 12px rgba(255, 183, 3, 0.2);
   margin-left: 1rem;
-  transition: border-color 0.25s ease, background 0.25s ease, transform 0.3s var(--spring);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.3s var(--spring), box-shadow 0.25s ease;
 }
 
 .nav-avatar svg {
@@ -415,6 +420,7 @@ nav a:hover::after {
 .nav-avatar:hover {
   border-color: rgba(255, 183, 3, 0.35);
   background: linear-gradient(135deg, rgba(255, 183, 3, 0.16), rgba(251, 133, 0, 0.08));
+  box-shadow: 0 0 20px rgba(255, 183, 3, 0.4);
   transform: scale(1.12);
 }
 
