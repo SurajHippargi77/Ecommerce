@@ -128,15 +128,15 @@ frontend_origins = [
     origin.strip()
     for origin in os.getenv(
         "FRONTEND_ORIGINS",
-        "http://127.0.0.1:8000,http://localhost:8000",
+        "http://127.0.0.1:8000,http://localhost:8000,http://localhost:5500,http://127.0.0.1:5500",
     ).split(",")
     if origin.strip()
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=frontend_origins or ["*"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -193,7 +193,7 @@ def build_cart_response(user_id: str) -> dict[str, Any]:
     if SUPABASE is not None:
         try:
             response = SUPABASE.table("cart_items").select("*").eq("user_id", user_id).order("created_at").execute()
-            rows = response.data or []
+            rows = response.data or cart_storage(user_id)
         except Exception as exc:  # pragma: no cover - runtime/network dependent
             LOGGER.warning("Using in-memory cart fallback: %s", exc)
             rows = cart_storage(user_id)
@@ -274,7 +274,7 @@ def list_orders(user_id: str) -> list[dict[str, Any]]:
     if SUPABASE is not None:
         try:
             response = SUPABASE.table("orders").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
-            return response.data or []
+            return response.data or order_storage(user_id)
         except Exception as exc:
             LOGGER.warning("Using in-memory orders fallback: %s", exc)
     return order_storage(user_id)
@@ -573,4 +573,3 @@ def http_get_orders(user_id: str) -> list[dict[str, Any]]:
 @app.post("/checkout/{user_id}")
 def http_checkout(user_id: str, payload: CheckoutPayload) -> dict[str, Any]:
     return create_order(user_id, payload)
-
