@@ -5,8 +5,10 @@ import os
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 try:
@@ -36,6 +38,7 @@ def load_env_file(file_path: str) -> None:
 
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
 load_env_file(os.path.join(BACKEND_DIR, ".env"))
 load_env_file(os.path.join(BACKEND_DIR, ".env.example"))
 
@@ -573,3 +576,28 @@ def http_get_orders(user_id: str) -> list[dict[str, Any]]:
 @app.post("/checkout/{user_id}")
 def http_checkout(user_id: str, payload: CheckoutPayload) -> dict[str, Any]:
     return create_order(user_id, payload)
+
+# --- Static File Serving ---
+
+# Mount CSS and JS directories
+app.mount("/css", StaticFiles(directory=os.path.join(PROJECT_ROOT, "css")), name="css")
+app.mount("/js", StaticFiles(directory=os.path.join(PROJECT_ROOT, "js")), name="js")
+
+@app.get("/")
+async def serve_index():
+    return FileResponse(os.path.join(PROJECT_ROOT, "index.html"))
+
+@app.get("/{page_name}.html")
+async def serve_html_pages(page_name: str):
+    file_path = os.path.join(PROJECT_ROOT, f"{page_name}.html")
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="Page not found")
+
+# Catch-all for sub-assets if necessary (optional)
+@app.get("/{filename}")
+async def serve_root_files(filename: str):
+    file_path = os.path.join(PROJECT_ROOT, filename)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    # Do not raise 404 here to let API routes work
