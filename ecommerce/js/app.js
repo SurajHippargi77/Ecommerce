@@ -1,5 +1,5 @@
 // Frontend logic wired to the FastAPI backend.
-const API_BASE = '';
+const API_BASE = 'http://127.0.0.1:8000';
 const PRODUCT_FALLBACKS = [
   {id:1,name:'Midnight Alloy Wheels',price:15999,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Ferrari_599_HY_KERS_wheel.jpg'},
   {id:2,name:'Carbon Grip Steering Cover',price:2499,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Old_car_steering_wheel_(2662480818).jpg'},

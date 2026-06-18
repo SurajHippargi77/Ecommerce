@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-from pathlib import Path
 import logging
 import os
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 try:
@@ -38,10 +35,9 @@ def load_env_file(file_path: str) -> None:
                 os.environ[key] = value
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-BACKEND_DIR = PROJECT_ROOT / "backend"
-load_env_file(str(BACKEND_DIR / ".env"))
-load_env_file(str(BACKEND_DIR / ".env.example"))
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_env_file(os.path.join(BACKEND_DIR, ".env"))
+load_env_file(os.path.join(BACKEND_DIR, ".env.example"))
 
 DEMO_PRODUCTS: list[dict[str, Any]] = [
     {
@@ -455,6 +451,11 @@ def delete_cart_item(user_id: str, item_id: str) -> dict[str, Any]:
     return {"deleted": True, "id": item_id}
 
 
+@app.get("/")
+def root() -> dict[str, Any]:
+    return {"name": "Sunny Shop API", "supabase_enabled": SUPABASE_ENABLED}
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     return {"status": "ok", "supabase_enabled": SUPABASE_ENABLED}
@@ -572,28 +573,3 @@ def http_get_orders(user_id: str) -> list[dict[str, Any]]:
 @app.post("/checkout/{user_id}")
 def http_checkout(user_id: str, payload: CheckoutPayload) -> dict[str, Any]:
     return create_order(user_id, payload)
-
-# --- Static File Serving ---
-
-# Mount CSS and JS directories
-app.mount("/css", StaticFiles(directory=PROJECT_ROOT / "css"), name="css")
-app.mount("/js", StaticFiles(directory=PROJECT_ROOT / "js"), name="js")
-
-@app.get("/")
-async def serve_index():
-    return FileResponse(PROJECT_ROOT / "index.html")
-
-@app.get("/{page_name}.html")
-async def serve_html_pages(page_name: str):
-    file_path = PROJECT_ROOT / f"{page_name}.html"
-    if file_path.exists():
-        return FileResponse(file_path)
-    raise HTTPException(status_code=404, detail="Page not found")
-
-# Catch-all for sub-assets if necessary (optional)
-@app.get("/{filename}")
-async def serve_root_files(filename: str):
-    file_path = PROJECT_ROOT / filename
-    if file_path.exists() and file_path.is_file():
-        return FileResponse(file_path)
-    # Do not raise 404 here to let API routes work
