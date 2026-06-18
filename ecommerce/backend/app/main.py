@@ -7,6 +7,8 @@ from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 try:
@@ -36,6 +38,7 @@ def load_env_file(file_path: str) -> None:
 
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.dirname(BACKEND_DIR)
 load_env_file(os.path.join(BACKEND_DIR, ".env"))
 load_env_file(os.path.join(BACKEND_DIR, ".env.example"))
 
@@ -451,9 +454,39 @@ def delete_cart_item(user_id: str, item_id: str) -> dict[str, Any]:
     return {"deleted": True, "id": item_id}
 
 
+def frontend_file(filename: str) -> FileResponse:
+    file_path = os.path.join(FRONTEND_DIR, filename)
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(file_path)
+
+
 @app.get("/")
-def root() -> dict[str, Any]:
-    return {"name": "Sunny Shop API", "supabase_enabled": SUPABASE_ENABLED}
+def serve_index() -> FileResponse:
+    return frontend_file("index.html")
+
+
+@app.get("/index.html")
+def serve_index_html() -> FileResponse:
+    return frontend_file("index.html")
+
+
+@app.get("/cart.html")
+@app.get("/cart")
+def serve_cart() -> FileResponse:
+    return frontend_file("cart.html")
+
+
+@app.get("/login.html")
+@app.get("/login")
+def serve_login() -> FileResponse:
+    return frontend_file("login.html")
+
+
+@app.get("/register.html")
+@app.get("/register")
+def serve_register() -> FileResponse:
+    return frontend_file("register.html")
 
 
 @app.get("/health")
@@ -573,3 +606,13 @@ def http_get_orders(user_id: str) -> list[dict[str, Any]]:
 @app.post("/checkout/{user_id}")
 def http_checkout(user_id: str, payload: CheckoutPayload) -> dict[str, Any]:
     return create_order(user_id, payload)
+
+
+_css_dir = os.path.join(FRONTEND_DIR, "css")
+_js_dir = os.path.join(FRONTEND_DIR, "js")
+
+if os.path.isdir(_css_dir):
+    app.mount("/css", StaticFiles(directory=_css_dir), name="css")
+
+if os.path.isdir(_js_dir):
+    app.mount("/js", StaticFiles(directory=_js_dir), name="js")
